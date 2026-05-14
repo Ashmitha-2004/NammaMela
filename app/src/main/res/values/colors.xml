@@ -1,0 +1,15 @@
+<resources>
+
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+
+    <color name="light_purple">#E6D6F2</color>
+
+    <color name="accentOrange">#FF9800</color>
+
+    <color name="primaryDark">#4A148C</color>
+    <color name="primaryLight">#CE93D8</color>
+
+    <color name="goldSoft">#FFD54F</color>
+
+</resources>

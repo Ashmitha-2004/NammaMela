@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 🎟 SEAT STYLE -->
+    <style name="SeatStyle">
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_margin">6dp</item>
+        <item name="backgroundTint">#7E57C2</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- 🎭 CAST CARD (ONLY ANDROID ATTRIBUTES) -->
+    <style name="CastCardStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
+    <!-- 📦 INNER CARD -->
+    <style name="CastInnerLayout">
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- 🖼 IMAGE -->
+    <style name="CastImage">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">120dp</item>
+        <item name="android:scaleType">centerCrop</item>
+    </style>
+
+    <!-- 👤 NAME -->
+    <style name="CastName">
+        <item name="android:textColor">#D4AF37</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+
+    <!-- 🎭 ROLE -->
+    <style name="CastRole">
+        <item name="android:textColor">#AAAAAA</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <!-- 🔘 BUTTON -->
+    <style name="BioButton">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:backgroundTint">#5E35B1</item>
+    </style>
+
+</resources>
