@@ -8,32 +8,32 @@
         android:label="NammaMela"
         android:theme="@style/Theme.NammaMela">
 
-        <!-- ✅ LOGIN = FIRST SCREEN -->
+        <activity android:name=".SignupActivity"/>
+        <activity android:name=".UpdateCastActivity"/>
+
         <activity
             android:name=".LoginActivity"
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
         </activity>
 
-        <!-- Other Activities -->
-        <activity android:name=".FanWallActivity" />
+        <activity android:name=".FanWallActivity"/>
         <activity android:name=".UpdatePlayActivity"/>
-        <activity android:name=".TicketActivity" />
+        <activity android:name=".TicketActivity"/>
 
         <activity
             android:name=".SeatBookingActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
         <activity
             android:name=".CastActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
-        <!-- ❗ REMOVE launcher from MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="false"/>

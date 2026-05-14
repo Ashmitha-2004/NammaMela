@@ -1,64 +1,110 @@
 package com.example.nammamela
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class UpdateCastActivity : AppCompatActivity() {
 
-    private lateinit var db: AppDatabase
+    private lateinit var nameEdit: EditText
+    private lateinit var roleEdit: EditText
+    private lateinit var imageEdit: EditText
+    private lateinit var updateBtn: Button
     private lateinit var castDao: CastDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_update_cast)
 
-        val name = findViewById<EditText>(R.id.editName)
-        val role = findViewById<EditText>(R.id.editRole)
-        val image = findViewById<EditText>(R.id.editImage)
-        val save = findViewById<Button>(R.id.saveBtn)
+        nameEdit = findViewById(R.id.castNameEdit)
+        roleEdit = findViewById(R.id.castRoleEdit)
+        imageEdit = findViewById(R.id.castImageEdit)
+        updateBtn = findViewById(R.id.updateCastButton)
 
-        db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "seat_db"
-        ).fallbackToDestructiveMigration().build()
+        castDao = AppDatabase.getDatabase(this).castDao()
 
-        castDao = db.castDao()
+        updateBtn.setOnClickListener {
+            updateCast()
+        }
+    }
 
-        save.setOnClickListener {
+    private fun updateCast() {
 
-            val nameText = name.text.toString().trim()
-            val roleText = role.text.toString().trim()
-            val imageText = image.text.toString().trim()
+        if (
+            nameEdit.text.toString().trim().isEmpty() ||
+            roleEdit.text.toString().trim().isEmpty() ||
+            imageEdit.text.toString().trim().isEmpty()
+        ) {
+            Toast.makeText(
+                this,
+                "All fields are required",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
 
-            if (nameText.isEmpty() || roleText.isEmpty() || imageText.isEmpty()) {
-                Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        val names = nameEdit.text.toString().split("|")
+        val roles = roleEdit.text.toString().split("|")
+        val images = imageEdit.text.toString().split("|")
+
+        if (
+            names.size != roles.size ||
+            roles.size != images.size
+        ) {
+            Toast.makeText(
+                this,
+                "Enter equal values separated by |",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        for (url in images) {
+            if (!Patterns.WEB_URL.matcher(url.trim()).matches()) {
+                Toast.makeText(
+                    this,
+                    "Invalid image URL",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+        }
+
+        lifecycleScope.launch {
+
+            castDao.deleteAll()
+
+            for (i in names.indices) {
+                castDao.insert(
+                    Cast(
+                        name = names[i].trim(),
+                        role = roles[i].trim(),
+                        imageUrl = images[i].trim()
+                    )
+                )
             }
 
-            lifecycleScope.launch {
+            runOnUiThread {
 
-                // ✅ Run DB operation in background thread
-                withContext(Dispatchers.IO) {
-                    castDao.insert(
-                        Cast(
-                            name = nameText,
-                            role = roleText,
-                            imageUrl = imageText
-                        )
+                Toast.makeText(
+                    this@UpdateCastActivity,
+                    "Updated Successfully",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                startActivity(
+                    Intent(
+                        this@UpdateCastActivity,
+                        UpdatePlayActivity::class.java
                     )
-                }
+                )
 
-                // ✅ Back on main thread → safe UI updates
-                Toast.makeText(this@UpdateCastActivity, "Cast Added", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

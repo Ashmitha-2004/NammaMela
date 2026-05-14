@@ -3,81 +3,125 @@ package com.example.nammamela
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var db: AppDatabase
-    lateinit var playDao: PlayDao
+    private lateinit var db: AppDatabase
+    private lateinit var playDao: PlayDao
 
-    lateinit var playTitle: TextView
-    lateinit var playDuration: TextView
-    lateinit var playImage: ImageView
+    private lateinit var playTitle: TextView
+    private lateinit var playDuration: TextView
+    private lateinit var playImage: ImageView
+    private lateinit var profileIcon: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val viewCastBtn =
+            findViewById<MaterialButton>(R.id.viewCastBtn)
 
-        val managerIcon = findViewById<ImageView>(R.id.managerIcon)
+        val bookSeatBtn =
+            findViewById<MaterialButton>(R.id.bookSeatBtn)
 
-        managerIcon.setOnClickListener {
+        val fanWallBtn =
+            findViewById<MaterialButton>(R.id.fanWallBtn)
 
-            val builder = android.app.AlertDialog.Builder(this)
-            builder.setTitle("Manager Login")
+        profileIcon =
+            findViewById(R.id.profileIcon)
 
-            val input = android.widget.EditText(this)
-            input.hint = "Enter Password"
-            builder.setView(input)
+        playTitle =
+            findViewById(R.id.playTitle)
 
-            builder.setPositiveButton("Login") { _, _ ->
-                if (input.text.toString() == "admin123") {
-                    startActivity(Intent(this, UpdatePlayActivity::class.java))
-                } else {
-                    android.widget.Toast.makeText(this, "Wrong Password", android.widget.Toast.LENGTH_SHORT).show()
-                }
-            }
+        playDuration =
+            findViewById(R.id.playDuration)
 
-            builder.setNegativeButton("Cancel", null)
-            builder.show()
-        }
+        playImage =
+            findViewById(R.id.playImage)
 
+        db = AppDatabase.getDatabase(this)
+        playDao = db.playDao()
 
-        val viewCastBtn = findViewById<MaterialButton>(R.id.viewCastBtn)
-        val bookSeatBtn = findViewById<MaterialButton>(R.id.bookSeatBtn)
-        val fanWallBtn = findViewById<MaterialButton>(R.id.fanWallBtn)
-
-        playTitle = findViewById(R.id.playTitle)
-        playDuration = findViewById(R.id.playDuration)
-        playImage = findViewById(R.id.playImage)
-
-        // Navigation
         viewCastBtn.setOnClickListener {
-            startActivity(Intent(this, CastActivity::class.java))
-        }
-
-        bookSeatBtn.setOnClickListener {
-            startActivity(Intent(this, SeatBookingActivity::class.java))
+            startActivity(
+                Intent(this, CastActivity::class.java)
+            )
         }
 
         fanWallBtn.setOnClickListener {
-            startActivity(Intent(this, FanWallActivity::class.java))
+            startActivity(
+                Intent(this, FanWallActivity::class.java)
+            )
         }
 
-        // ✅ SAME DB NAME EVERYWHERE
-        db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "namma_mela_db"
-        ).fallbackToDestructiveMigration().build()
+        bookSeatBtn.setOnClickListener {
 
-        playDao = db.playDao()
+            lifecycleScope.launch {
+
+                val play = playDao.getPlay()
+
+                val intent = Intent(
+                    this@MainActivity,
+                    SeatBookingActivity::class.java
+                )
+
+                intent.putExtra(
+                    "playName",
+                    play?.title ?: "No Play Updated"
+                )
+
+                intent.putExtra(
+                    "showTime",
+                    play?.time ?: "-"
+                )
+
+                startActivity(intent)
+            }
+        }
+
+        // PROFILE MENU
+        profileIcon.setOnClickListener {
+
+            val popup =
+                PopupMenu(this, profileIcon)
+
+            popup.menu.add("Logout")
+
+            popup.setOnMenuItemClickListener {
+
+                // VERY IMPORTANT
+                getSharedPreferences(
+                    "NammaMelaUser",
+                    MODE_PRIVATE
+                )
+                    .edit()
+                    .putBoolean("loggedIn", false)
+                    .apply()
+
+                val intent = Intent(
+                    this,
+                    LoginActivity::class.java
+                )
+
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+                startActivity(intent)
+                finish()
+
+                true
+            }
+
+            popup.show()
+        }
 
         loadPlayData()
     }
@@ -88,32 +132,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadPlayData() {
+
         lifecycleScope.launch {
 
-            var play = playDao.getPlay()
-
-            if (play == null) {
-                playDao.insert(
-                    Play(
-                        id = 1,
-                        title = "Veera Kathai",
-                        duration = "2 Hours",
-                        time = "7:00 PM",
-                        imageUrl = ""
-                    )
-                )
-                play = playDao.getPlay()
-            }
+            val play = playDao.getPlay()
 
             play?.let {
-                playTitle.text = it.title
-                playDuration.text = "${it.time} • ${it.duration}"
 
-                Glide.with(this@MainActivity)
-                    .load(it.imageUrl)
-                    .placeholder(R.drawable.veera_kathai)
-                    .error(R.drawable.veera_kathai)
-                    .into(playImage)
+                runOnUiThread {
+
+                    playTitle.text = it.title
+
+                    playDuration.text =
+                        "${it.time} • ${it.duration}"
+
+                    Glide.with(this@MainActivity)
+                        .load(it.imageUrl)
+                        .placeholder(
+                            R.drawable.veera_kathai
+                        )
+                        .error(
+                            R.drawable.veera_kathai
+                        )
+                        .into(playImage)
+                }
             }
         }
     }

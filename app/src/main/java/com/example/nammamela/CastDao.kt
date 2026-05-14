@@ -13,6 +13,4 @@ interface CastDao {
 
     @Query("DELETE FROM cast_table")
     suspend fun deleteAll()
-
-
 }

@@ -13,4 +13,7 @@ interface SeatDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(seat: Seat)
+
+    @Query("DELETE FROM Seat WHERE bookedByUser = 1")
+    suspend fun deleteUserBookings()
 }

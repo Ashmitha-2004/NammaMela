@@ -13,4 +13,7 @@ interface PlayDao {
 
     @Query("SELECT * FROM play_table WHERE id = 1")
     suspend fun getPlay(): Play?
+
+    @Query("DELETE FROM play_table")
+    suspend fun deleteAll()
 }

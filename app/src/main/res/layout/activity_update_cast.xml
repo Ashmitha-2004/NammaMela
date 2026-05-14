@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/editName"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Name" />
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <EditText
-        android:id="@+id/editRole"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter Role" />
+        <EditText
+            android:id="@+id/castNameEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Names separated by |"/>
 
-    <EditText
-        android:id="@+id/editImage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter Image URL" />
+        <EditText
+            android:id="@+id/castRoleEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Roles separated by |"/>
 
-    <Button
-        android:id="@+id/saveBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save" />
+        <EditText
+            android:id="@+id/castImageEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Image URLs separated by |"/>
 
-</LinearLayout>
+        <Button
+            android:id="@+id/updateCastButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Cast"/>
+
+    </LinearLayout>
+
+</ScrollView>

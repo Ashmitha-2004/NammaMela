@@ -5,7 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Seat(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val seatNumber: String,
-    val isBooked: Boolean
+    @PrimaryKey
+    val seatNumber: String = "",
+
+    val isBooked: Boolean = false,
+
+    val bookedByUser: Boolean = false
 )

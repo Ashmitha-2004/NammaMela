@@ -5,9 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "play_table")
 data class Play(
-    @PrimaryKey val id: Int = 1,   // ✅ Always single row
+    @PrimaryKey
+    val id: Int = 1,
     val title: String,
-    val duration: String,
     val time: String,
+    val duration: String,
     val imageUrl: String
 )

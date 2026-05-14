@@ -1,122 +1,209 @@
 package com.example.nammamela
 
-import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
+import kotlinx.coroutines.launch
 
 class SeatBookingActivity : AppCompatActivity() {
 
     private lateinit var seatGrid: GridLayout
     private lateinit var selectedSeatsText: TextView
+    private lateinit var seatsLeftText: TextView
     private lateinit var confirmBtn: Button
+    private lateinit var cancelBtn: Button
     private lateinit var generateTicketBtn: Button
+
+    private lateinit var db: AppDatabase
+    private lateinit var seatDao: SeatDao
 
     private val selectedSeats = mutableListOf<String>()
     private val bookedSeats = mutableSetOf<String>()
+    private val mySeats = mutableSetOf<String>()
 
-    private var isBookingConfirmed = false
+    private lateinit var playName: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_seat_booking)
 
-        val backBtn = findViewById<ImageView>(R.id.backBtn)
+        playName =
+            intent.getStringExtra("playName")
+                ?: "Namma Mela Show"
 
-        backBtn.setOnClickListener {
-            finish()
-        }
+        db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "nammamela-db"
+        ).fallbackToDestructiveMigration()
+            .build()
+
+        seatDao = db.seatDao()
 
         seatGrid = findViewById(R.id.seatGrid)
         selectedSeatsText = findViewById(R.id.tvSelectedSeats)
+        seatsLeftText = findViewById(R.id.tvSeatsLeft)
+
         confirmBtn = findViewById(R.id.btnConfirm)
+        cancelBtn = findViewById(R.id.btnCancel)
         generateTicketBtn = findViewById(R.id.generateTicketBtn)
 
-        generateTicketBtn.visibility = View.GONE
+        findViewById<ImageView>(R.id.backBtn)
+            .setOnClickListener { finish() }
 
-        loadBookedSeats()
-        createSeats()
+        loadSeats()
 
-        // ✅ CONFIRM BOOKING (unchanged logic + small addition)
         confirmBtn.setOnClickListener {
+            confirmBooking()
+        }
 
-            if (selectedSeats.isEmpty()) {
-                Toast.makeText(this, "No seats selected", Toast.LENGTH_SHORT).show()
+        cancelBtn.setOnClickListener {
+            cancelBooking()
+        }
+
+        generateTicketBtn.setOnClickListener {
+
+            if (mySeats.isEmpty()) {
+                Toast.makeText(
+                    this,
+                    "Please book seats first",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
-            bookedSeats.addAll(selectedSeats)
-            saveBookedSeats()
+            val selectedPlay =
+                intent.getStringExtra("playName") ?: "Namma Mela"
 
-            Toast.makeText(this, "Booked: $selectedSeats", Toast.LENGTH_SHORT).show()
+            val selectedTime =
+                intent.getStringExtra("showTime") ?: "7:00 PM"
 
-            isBookingConfirmed = true
-            generateTicketBtn.visibility = View.VISIBLE
+            val ticketIntent =
+                Intent(this, TicketActivity::class.java)
 
-            selectedSeatsText.text = selectedSeats.joinToString(", ")
+            ticketIntent.putExtra("play", selectedPlay)
+            ticketIntent.putExtra("seat", mySeats.joinToString(", "))
+            ticketIntent.putExtra("time", selectedTime)
 
-            // Refresh UI
-            seatGrid.removeAllViews()
-            createSeats()
-        }
-
-        // 🎟 GENERATE TICKET
-        generateTicketBtn.setOnClickListener {
-
-            if (!isBookingConfirmed) return@setOnClickListener
-
-            val intent = Intent(this, TicketActivity::class.java)
-            intent.putExtra("play", "Veera Kathai")
-            intent.putExtra("seat", selectedSeats.joinToString(", "))
-            intent.putExtra("time", "7:00 PM")
-            startActivity(intent)
+            startActivity(ticketIntent)
         }
     }
 
-    // 🔹 Create seat grid
+    override fun onResume() {
+        super.onResume()
+        loadSeats()
+    }
+
+    private fun loadSeats() {
+        lifecycleScope.launch {
+
+            val allSeats = seatDao.getAll()
+
+            bookedSeats.clear()
+            mySeats.clear()
+
+            bookedSeats.addAll(
+                allSeats.filter { it.isBooked }
+                    .map { it.seatNumber }
+            )
+
+            mySeats.addAll(
+                allSeats.filter {
+                    it.isBooked && it.bookedByUser
+                }.map { it.seatNumber }
+            )
+
+            runOnUiThread {
+                generateTicketBtn.visibility =
+                    if (mySeats.isNotEmpty())
+                        View.VISIBLE
+                    else View.GONE
+
+                refreshGrid()
+            }
+        }
+    }
+
+    private fun refreshGrid() {
+        seatGrid.removeAllViews()
+        createSeats()
+
+        selectedSeatsText.text =
+            if (selectedSeats.isEmpty())
+                "None"
+            else selectedSeats.joinToString(", ")
+
+        seatsLeftText.text =
+            "Seats Left: ${25 - bookedSeats.size}"
+    }
+
     private fun createSeats() {
-        val rows = listOf("A", "B", "C", "D", "E")
+
+        val rows = listOf("A","B","C","D","E")
 
         for (row in rows) {
             for (i in 1..5) {
+
                 val seatId = "$row$i"
 
                 val btn = Button(this)
                 btn.text = seatId
 
-                val params = GridLayout.LayoutParams()
+                val params =
+                    GridLayout.LayoutParams()
+
                 params.width = 0
-                params.height = 150
-                params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                params.setMargins(8, 8, 8, 8)
+                params.height = 120
+                params.columnSpec =
+                    GridLayout.spec(
+                        GridLayout.UNDEFINED,1f
+                    )
+
+                params.setMargins(4,4,4,4)
+
                 btn.layoutParams = params
 
                 when {
-                    bookedSeats.contains(seatId) -> {
-                        btn.setBackgroundColor(0xFFE53935.toInt()) // 🔴 Booked
-                        btn.isEnabled = false
-                    }
+                    selectedSeats.contains(seatId) ->
+                        btn.setBackgroundColor(
+                            Color.GREEN
+                        )
 
-                    else -> {
-                        btn.setBackgroundColor(0xFF7E57C2.toInt()) // 🟣 Available
-                    }
+                    bookedSeats.contains(seatId) ->
+                        btn.setBackgroundColor(
+                            Color.RED
+                        )
+
+                    else ->
+                        btn.setBackgroundColor(
+                            Color.parseColor(
+                                "#7E57C2"
+                            )
+                        )
                 }
 
                 btn.setOnClickListener {
 
-                    if (selectedSeats.contains(seatId)) {
-                        selectedSeats.remove(seatId)
-                        btn.setBackgroundColor(0xFF7E57C2.toInt())
-                    } else {
-                        selectedSeats.add(seatId)
-                        btn.setBackgroundColor(0xFF00C853.toInt())
+                    if (bookedSeats.contains(seatId)) {
+                        Toast.makeText(
+                            this,
+                            "Seat already booked",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
                     }
 
-                    selectedSeatsText.text =
-                        if (selectedSeats.isEmpty()) "None"
-                        else selectedSeats.joinToString(", ")
+                    if (selectedSeats.contains(seatId))
+                        selectedSeats.remove(seatId)
+                    else
+                        selectedSeats.add(seatId)
+
+                    refreshGrid()
                 }
 
                 seatGrid.addView(btn)
@@ -124,16 +211,78 @@ class SeatBookingActivity : AppCompatActivity() {
         }
     }
 
-    // 🔹 Save booked seats
-    private fun saveBookedSeats() {
-        val prefs = getSharedPreferences("SEATS", Context.MODE_PRIVATE)
-        prefs.edit().putStringSet("BOOKED", bookedSeats).apply()
+    private fun confirmBooking() {
+
+        if (selectedSeats.isEmpty()) {
+            Toast.makeText(
+                this,
+                "Select seat first",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        lifecycleScope.launch {
+
+            selectedSeats.forEach {
+
+                seatDao.insert(
+                    Seat(
+                        seatNumber = it,
+                        isBooked = true,
+                        bookedByUser = true
+                    )
+                )
+            }
+
+            runOnUiThread {
+                Toast.makeText(
+                    this@SeatBookingActivity,
+                    "Booking Confirmed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            selectedSeats.clear()
+            loadSeats()
+        }
     }
 
-    // 🔹 Load booked seats
-    private fun loadBookedSeats() {
-        val prefs = getSharedPreferences("SEATS", Context.MODE_PRIVATE)
-        val saved = prefs.getStringSet("BOOKED", emptySet())
-        bookedSeats.addAll(saved!!)
+    private fun cancelBooking() {
+
+        if (mySeats.isEmpty()) {
+            Toast.makeText(
+                this,
+                "No booking to cancel",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        lifecycleScope.launch {
+
+            mySeats.forEach {
+
+                seatDao.insert(
+                    Seat(
+                        seatNumber = it,
+                        isBooked = false,
+                        bookedByUser = false
+                    )
+                )
+            }
+
+            selectedSeats.clear()
+
+            runOnUiThread {
+                Toast.makeText(
+                    this@SeatBookingActivity,
+                    "Booking Cancelled",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            loadSeats()
+        }
     }
 }
