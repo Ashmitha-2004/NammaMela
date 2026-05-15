@@ -8,12 +8,15 @@ import androidx.room.Query
 @Dao
 interface SeatDao {
 
-    @Query("SELECT * FROM Seat")
-    suspend fun getAll(): List<Seat>
+    @Query("SELECT * FROM seat_table WHERE showKey = :showKey")
+    suspend fun getSeats(showKey: String): List<Seat>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(seat: Seat)
 
-    @Query("DELETE FROM Seat WHERE bookedByUser = 1")
-    suspend fun deleteUserBookings()
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(seats: List<Seat>)
+
+    @Query("DELETE FROM seat_table WHERE showKey = :showKey")
+    suspend fun clearShowSeats(showKey: String)
 }

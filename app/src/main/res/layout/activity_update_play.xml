@@ -1,11 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp">
 
+    <!-- Logout -->
+
+
+    <!-- LIVE PREVIEW -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#E6D9F8"
+        android:padding="16dp"
+        android:layout_marginBottom="20dp"
+        android:elevation="4dp">
+
+        <TextView
+            android:id="@+id/tvPreviewTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Title: -"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:paddingBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvPreviewTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Time: -"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:paddingBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvPreviewDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Duration: -"
+            android:textStyle="bold"
+            android:textSize="18sp"/>
+
+    </LinearLayout>
+
+    <!-- INPUTS -->
     <EditText
         android:id="@+id/titleInput"
         android:hint="Play Name"
@@ -30,31 +73,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!-- BUTTONS -->
 
     <Button
         android:id="@+id/saveBtn"
-        android:text="UPDATE PLAY"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
+        android:text="UPDATE PLAY"
         android:layout_marginTop="20dp"/>
 
     <Button
         android:id="@+id/updateCastBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="UPDATE CAST"
         android:backgroundTint="#7B1FA2"
         android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="15dp"/>
 
     <Button
-        android:id="@+id/confirmBtn"
+        android:id="@+id/logoutBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="CONFIRM BOOKING"
-        android:backgroundTint="#6A0DAD"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="16dp"/>
-
+        android:layout_height="56dp"
+        android:text="LOGOUT"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#B71C1C"
+        android:layout_marginTop="20dp"/>
 </LinearLayout>

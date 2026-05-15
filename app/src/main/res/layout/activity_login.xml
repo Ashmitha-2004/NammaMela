@@ -9,16 +9,17 @@
     android:background="#EDE7F6">
 
     <TextView
-        android:id="@+id/managerHint"
+        android:id="@+id/demoText"
         android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:text="Demo Manager Access\n(Manager username and password are fixed for demo purpose)\nUsername: manager\nPassword: mela123"
-        android:textSize="13sp"
-        android:textColor="#6A1B9A"
+        android:layout_height="wrap_content"
+        android:text="Demo Manager Access&#10;Username: manager&#10;Password: mela123"
+        android:textColor="#5E239D"
         android:textStyle="bold"
-        android:gravity="top|center_horizontal"
+        android:textSize="14sp"
         android:layout_gravity="center"
-        android:paddingTop="0dp"/>
+        android:gravity="center"
+        android:layout_marginBottom="50dp"/>
+
     <!-- TITLE -->
     <TextView
         android:layout_width="wrap_content"

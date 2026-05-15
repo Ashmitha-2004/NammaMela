@@ -16,6 +16,7 @@ class UpdateCastActivity : AppCompatActivity() {
     private lateinit var roleEdit: EditText
     private lateinit var imageEdit: EditText
     private lateinit var updateBtn: Button
+    private lateinit var returnBtn: Button
     private lateinit var castDao: CastDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,8 +27,16 @@ class UpdateCastActivity : AppCompatActivity() {
         roleEdit = findViewById(R.id.castRoleEdit)
         imageEdit = findViewById(R.id.castImageEdit)
         updateBtn = findViewById(R.id.updateCastButton)
+        returnBtn = findViewById(R.id.returnDashboardBtn)
 
         castDao = AppDatabase.getDatabase(this).castDao()
+
+        // ✅ FIXED: goes to UpdatePlayActivity (your requirement)
+        returnBtn.setOnClickListener {
+            val intent = Intent(this, UpdatePlayActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         updateBtn.setOnClickListener {
             updateCast()
@@ -41,11 +50,7 @@ class UpdateCastActivity : AppCompatActivity() {
             roleEdit.text.toString().trim().isEmpty() ||
             imageEdit.text.toString().trim().isEmpty()
         ) {
-            Toast.makeText(
-                this,
-                "All fields are required",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -53,31 +58,19 @@ class UpdateCastActivity : AppCompatActivity() {
         val roles = roleEdit.text.toString().split("|")
         val images = imageEdit.text.toString().split("|")
 
-        if (
-            names.size != roles.size ||
-            roles.size != images.size
-        ) {
-            Toast.makeText(
-                this,
-                "Enter equal values separated by |",
-                Toast.LENGTH_SHORT
-            ).show()
+        if (names.size != roles.size || roles.size != images.size) {
+            Toast.makeText(this, "Enter equal values separated by |", Toast.LENGTH_SHORT).show()
             return
         }
 
         for (url in images) {
             if (!Patterns.WEB_URL.matcher(url.trim()).matches()) {
-                Toast.makeText(
-                    this,
-                    "Invalid image URL",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this, "Invalid image URL", Toast.LENGTH_SHORT).show()
                 return
             }
         }
 
         lifecycleScope.launch {
-
             castDao.deleteAll()
 
             for (i in names.indices) {
@@ -91,20 +84,11 @@ class UpdateCastActivity : AppCompatActivity() {
             }
 
             runOnUiThread {
-
-                Toast.makeText(
-                    this@UpdateCastActivity,
-                    "Updated Successfully",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this@UpdateCastActivity, "Updated Successfully", Toast.LENGTH_SHORT).show()
 
                 startActivity(
-                    Intent(
-                        this@UpdateCastActivity,
-                        UpdatePlayActivity::class.java
-                    )
+                    Intent(this@UpdateCastActivity, UpdatePlayActivity::class.java)
                 )
-
                 finish()
             }
         }
